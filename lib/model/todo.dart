@@ -6,6 +6,7 @@ class Todo {
   });
 
   final String name;
-  final String date;
+  final DateTime date;
   bool checked;
+
 }
