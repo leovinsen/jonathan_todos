@@ -1,27 +1,25 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-
 import 'package:jo_todos/model/todo.dart';
 import 'package:jo_todos/services/i_task_creator.dart';
-
 
 class StreamBuilderPage extends StatefulWidget {
   const StreamBuilderPage({
     Key? key,
-    required this.taskCreator,
+    //requirednya aku lepas karena gamau jalan kalo di run/ render di emulator
+    this.taskCreator,
   }) : super(key: key);
 
-  final ITaskCreator taskCreator;
+  final ITaskCreator? taskCreator; //Null safety
 
   @override
   State<StreamBuilderPage> createState() => _StreamBuilderPageState();
 }
 
 class _StreamBuilderPageState extends State<StreamBuilderPage> {
-
   String todoTask = "";
-  
+
   late TextEditingController controller;
 
   @override
@@ -52,14 +50,17 @@ class _StreamBuilderPageState extends State<StreamBuilderPage> {
               if (task == null) {
                 return;
               } else {
-
                 final newTodo = Todo(
                   name: task,
-                  date: DateTime.now().toString().substring(0, 10),
+                  date: DateTime.now(),
                 );
+                // newTodo terisi
+                print("masuk ke new todo");
+                print(newTodo);
 
-                await widget.taskCreator.addTodo(newTodo);
-
+                // fungsi dibawah gak jalan apa karena aku pake null safety ?
+                // Mengirim data ke fungsi add milik Stream tapi kan ini harusnya ?
+                await widget.taskCreator?.addTodo(newTodo);
               }
               // do something
             },
@@ -68,19 +69,18 @@ class _StreamBuilderPageState extends State<StreamBuilderPage> {
       ),
       body: SafeArea(
           child: Center(
-
         child: StreamBuilder<List<Todo>>(
-          stream: widget.taskCreator.streamCtrlTodo.stream,
+          // stream itu ngambil data yang sudah berubah atau berubah kalo ada event.
+          stream: widget.taskCreator?.streamCtrlTodo.stream,
           builder: (context, snapshot) {
+            //Pengambilan data dari stream dalam bentuk snapshot kan ?
             final todoList = snapshot.data;
-            print(todoList);
 
             if (todoList == null) {
               // I don't think this will happen, but let's avoid runtime errors
               // for now. You can improve it later
               return Text('todos null');
             }
-
 
             return ListView.builder(
               itemBuilder: (context, index) {
@@ -90,9 +90,7 @@ class _StreamBuilderPageState extends State<StreamBuilderPage> {
 
                 final Todo todo = todoList[index];
                 return ListTile(
-
-                  title: Text(myTodo[index].toString()),
-
+                  title: Text(todo.toString()),
                 );
               },
               itemCount: todoList.length,
@@ -125,17 +123,3 @@ class _StreamBuilderPageState extends State<StreamBuilderPage> {
     controller.clear();
   }
 }
-
-
-// class TaskCreator {
-//   TaskCreator() {
-//     _controller.sink.add(myTodo);
-//   }
-//   final _controller = StreamController<List>();
-
-//   Stream<List> get stream => _controller.stream;
-
-//   dispose() {
-//     _controller.close();
-//   }
-// }

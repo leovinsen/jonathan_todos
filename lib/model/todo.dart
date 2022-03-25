@@ -9,4 +9,8 @@ class Todo {
   final DateTime date;
   bool checked;
 
+  @override
+  String toString() {
+    return "$name, $date";
+  }
 }

@@ -10,7 +10,10 @@ class MemoryTaskCreator extends ITaskCreator {
 
   @override
   Future<void> addTodo(Todo todo) async {
+    // lagi berusaha debug kenapa dia gak mau masuk.
     listTodos.add(todo);
+    print("list");
+    print(listTodos);
     super.streamCtrlTodo.add(listTodos);
   }
 
