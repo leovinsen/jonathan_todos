@@ -1,17 +1,27 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:jo_todos/home/taskcreator.dart';
+
+import 'package:jo_todos/model/todo.dart';
+import 'package:jo_todos/services/i_task_creator.dart';
+
 
 class StreamBuilderPage extends StatefulWidget {
-  const StreamBuilderPage({Key? key}) : super(key: key);
+  const StreamBuilderPage({
+    Key? key,
+    required this.taskCreator,
+  }) : super(key: key);
+
+  final ITaskCreator taskCreator;
 
   @override
   State<StreamBuilderPage> createState() => _StreamBuilderPageState();
 }
 
 class _StreamBuilderPageState extends State<StreamBuilderPage> {
+
   String todoTask = "";
+  
   late TextEditingController controller;
 
   @override
@@ -42,7 +52,14 @@ class _StreamBuilderPageState extends State<StreamBuilderPage> {
               if (task == null) {
                 return;
               } else {
-                todoTask = task;
+
+                final newTodo = Todo(
+                  name: task,
+                  date: DateTime.now().toString().substring(0, 10),
+                );
+
+                await widget.taskCreator.addTodo(newTodo);
+
               }
               // do something
             },
@@ -51,16 +68,34 @@ class _StreamBuilderPageState extends State<StreamBuilderPage> {
       ),
       body: SafeArea(
           child: Center(
-        child: StreamBuilder(
-          stream: taskCreator(todoTask),
+
+        child: StreamBuilder<List<Todo>>(
+          stream: widget.taskCreator.streamCtrlTodo.stream,
           builder: (context, snapshot) {
+            final todoList = snapshot.data;
+            print(todoList);
+
+            if (todoList == null) {
+              // I don't think this will happen, but let's avoid runtime errors
+              // for now. You can improve it later
+              return Text('todos null');
+            }
+
+
             return ListView.builder(
               itemBuilder: (context, index) {
+                // I personally like to retrieve the Todo object from list and
+                // assign it into a variable at the start of itemBuilder.
+                // This way you don't have to call todoList[index] many times.
+
+                final Todo todo = todoList[index];
                 return ListTile(
+
                   title: Text(myTodo[index].toString()),
+
                 );
               },
-              itemCount: myTodo.length,
+              itemCount: todoList.length,
             );
           },
         ),
@@ -90,3 +125,17 @@ class _StreamBuilderPageState extends State<StreamBuilderPage> {
     controller.clear();
   }
 }
+
+
+// class TaskCreator {
+//   TaskCreator() {
+//     _controller.sink.add(myTodo);
+//   }
+//   final _controller = StreamController<List>();
+
+//   Stream<List> get stream => _controller.stream;
+
+//   dispose() {
+//     _controller.close();
+//   }
+// }
