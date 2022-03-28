@@ -10,22 +10,21 @@ class MemoryTaskCreator extends ITaskCreator {
 
   @override
   Future<void> addTodo(Todo todo) async {
-    // lagi berusaha debug kenapa dia gak mau masuk.
     listTodos.add(todo);
-    print("list");
-    print(listTodos);
     super.streamCtrlTodo.add(listTodos);
   }
 
   @override
-  Future<void> deleteTodo(Todo todo) {
-    // TODO: implement deleteTodo
-    throw UnimplementedError();
+  Future<void> deleteTodo(Todo todo) async {
+    listTodos.remove(todo);
+    super.streamCtrlTodo.add(listTodos);
   }
 
   @override
-  Future<void> editTodo(Todo oldTodo, Todo newTodo) {
+  Future<void> editTodo(int index, Todo newTodo) async {
+    listTodos[index].name = newTodo.name;
+    super.streamCtrlTodo.add(listTodos);
     // TODO: implement editTodo
-    throw UnimplementedError();
+    // throw UnimplementedError();
   }
 }

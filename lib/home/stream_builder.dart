@@ -1,17 +1,17 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:jo_todos/model/todo.dart';
 import 'package:jo_todos/services/i_task_creator.dart';
+import 'package:jo_todos/widgets/add_todo_dialog.dart';
+import 'package:jo_todos/widgets/edit_or_delete_todo_dialog.dart';
 
 class StreamBuilderPage extends StatefulWidget {
   const StreamBuilderPage({
     Key? key,
     //requirednya aku lepas karena gamau jalan kalo di run/ render di emulator
-    this.taskCreator,
+    required this.taskCreator,
   }) : super(key: key);
 
-  final ITaskCreator? taskCreator; //Null safety
+  final ITaskCreator taskCreator;
 
   @override
   State<StreamBuilderPage> createState() => _StreamBuilderPageState();
@@ -21,11 +21,13 @@ class _StreamBuilderPageState extends State<StreamBuilderPage> {
   String todoTask = "";
 
   late TextEditingController controller;
+  late TextEditingController editcontroller;
 
   @override
   void initState() {
     super.initState();
     controller = TextEditingController();
+    editcontroller = TextEditingController();
   }
 
   @override
@@ -42,28 +44,10 @@ class _StreamBuilderPageState extends State<StreamBuilderPage> {
         actions: <Widget>[
           IconButton(
             icon: const Icon(
-              Icons.plus_one,
+              Icons.add_box,
               color: Colors.white,
             ),
-            onPressed: () async {
-              final task = await openDialog();
-              if (task == null) {
-                return;
-              } else {
-                final newTodo = Todo(
-                  name: task,
-                  date: DateTime.now(),
-                );
-                // newTodo terisi
-                print("masuk ke new todo");
-                print(newTodo);
-
-                // fungsi dibawah gak jalan apa karena aku pake null safety ?
-                // Mengirim data ke fungsi add milik Stream tapi kan ini harusnya ?
-                await widget.taskCreator?.addTodo(newTodo);
-              }
-              // do something
-            },
+            onPressed: _showDialogAddTodo,
           )
         ],
       ),
@@ -71,7 +55,7 @@ class _StreamBuilderPageState extends State<StreamBuilderPage> {
           child: Center(
         child: StreamBuilder<List<Todo>>(
           // stream itu ngambil data yang sudah berubah atau berubah kalo ada event.
-          stream: widget.taskCreator?.streamCtrlTodo.stream,
+          stream: widget.taskCreator.streamCtrlTodo.stream,
           builder: (context, snapshot) {
             //Pengambilan data dari stream dalam bentuk snapshot kan ?
             final todoList = snapshot.data;
@@ -79,7 +63,7 @@ class _StreamBuilderPageState extends State<StreamBuilderPage> {
             if (todoList == null) {
               // I don't think this will happen, but let's avoid runtime errors
               // for now. You can improve it later
-              return Text('todos null');
+              return const Text('todos null');
             }
 
             return ListView.builder(
@@ -90,7 +74,14 @@ class _StreamBuilderPageState extends State<StreamBuilderPage> {
 
                 final Todo todo = todoList[index];
                 return ListTile(
-                  title: Text(todo.toString()),
+                  title: Text(todo.name),
+                  subtitle: Text(
+                    todo.date.toString().substring(0, 16),
+                  ),
+                  onTap: () => _showDialogEditOrRemoveTodo(
+                    index,
+                    todo,
+                  ),
                 );
               },
               itemCount: todoList.length,
@@ -101,25 +92,44 @@ class _StreamBuilderPageState extends State<StreamBuilderPage> {
     );
   }
 
-  Future<String?> openDialog() => showDialog<String>(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('To do List'),
-          content: TextField(
-            autofocus: true,
-            decoration: const InputDecoration(hintText: 'Add your Todo'),
-            controller: controller,
-          ),
-          actions: [
-            TextButton(
-              child: const Text('SUBMIT'),
-              onPressed: submit,
-            )
-          ],
-        ),
-      );
-  void submit() {
-    Navigator.of(context).pop(controller.text);
-    controller.clear();
+  Future<void> _showDialogAddTodo() async {
+    final String? taskTitle = await showDialog<String>(
+      context: context,
+      builder: (context) => const AddTodoDialog(),
+    );
+
+    // If user closed the dialog or entered an empty text
+    if (taskTitle == null || taskTitle.isEmpty) return;
+
+    final newTodo = Todo(
+      name: taskTitle,
+      date: DateTime.now(),
+    );
+
+    await widget.taskCreator.addTodo(newTodo);
+  }
+
+  Future<void> _showDialogEditOrRemoveTodo(
+    int index,
+    Todo todo,
+  ) async {
+    final DialogResult? result = await showDialog<DialogResult>(
+      context: context,
+      builder: (context) => EditOrDeleteDialog(
+        initialTodo: todo,
+      ),
+    );
+
+    // If user closed the dialog
+    if (result == null) return;
+
+    switch (result.action) {
+      case DialogAction.editTodo:
+        await widget.taskCreator.editTodo(index, result.todo);
+        break;
+      case DialogAction.deleteTodo:
+        await widget.taskCreator.deleteTodo(result.todo);
+        break;
+    }
   }
 }

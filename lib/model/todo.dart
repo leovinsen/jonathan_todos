@@ -5,7 +5,7 @@ class Todo {
     this.checked = false,
   });
 
-  final String name;
+  late String name;
   final DateTime date;
   bool checked;
 

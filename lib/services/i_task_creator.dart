@@ -12,7 +12,9 @@ abstract class ITaskCreator {
   Future<void> addTodo(Todo todo);
 
   /// Edits [oldTodo] into [newTodo]
-  Future<void> editTodo(Todo oldTodo, Todo newTodo);
+  // Future<void> editTodo(Todo oldTodo, Todo newTodo);
+
+  Future<void> editTodo(int index, Todo newTodo);
 
   /// Deletes a Todo
   Future<void> deleteTodo(Todo todo);
