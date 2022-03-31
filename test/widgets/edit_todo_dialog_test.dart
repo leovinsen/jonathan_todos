@@ -46,7 +46,10 @@ void main() {
           },
         ) as DialogResult?;
 
-        expect(result?.todo.name, todoUpdate.name);
+        expect(result, isNotNull);
+        expect(result!.action, DialogAction.editTodo);
+
+        expect(result.todo.name, todoUpdate.name);
       }
 
       // Build our app and trigger a frame.

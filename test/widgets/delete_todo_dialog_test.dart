@@ -41,7 +41,8 @@ void main() {
           },
         ) as DialogResult?;
 
-        expect(result?.action, DialogAction.deleteTodo);
+        expect(result, isNotNull);
+        expect(result!.action, DialogAction.deleteTodo);
       }
 
       // Build our app and trigger a frame.
