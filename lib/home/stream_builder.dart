@@ -1,17 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:jo_todos/bloc/todo_bloc.dart';
 import 'package:jo_todos/model/todo.dart';
-import 'package:jo_todos/services/i_task_creator.dart';
 import 'package:jo_todos/widgets/add_todo_dialog.dart';
 import 'package:jo_todos/widgets/edit_or_delete_todo_dialog.dart';
 
 class StreamBuilderPage extends StatefulWidget {
   const StreamBuilderPage({
     Key? key,
-    //requirednya aku lepas karena gamau jalan kalo di run/ render di emulator
-    required this.taskCreator,
   }) : super(key: key);
-
-  final ITaskCreator taskCreator;
 
   @override
   State<StreamBuilderPage> createState() => _StreamBuilderPageState();
@@ -51,41 +48,36 @@ class _StreamBuilderPageState extends State<StreamBuilderPage> {
           )
         ],
       ),
-      body: SafeArea(
-          child: Center(
-        child: StreamBuilder<List<Todo>>(
-          // stream itu ngambil data yang sudah berubah atau berubah kalo ada event.
-          stream: widget.taskCreator.streamCtrlTodo.stream,
-          builder: (context, snapshot) {
-            //Pengambilan data dari stream dalam bentuk snapshot kan ?
-            final todoList = snapshot.data;
-
-            if (todoList == null) {
-              // I don't think this will happen, but let's avoid runtime errors
-              // for now. You can improve it later
-              return const Text('todos null');
+      body: SafeArea(child: Center(
+        child: BlocBuilder<TodoBloc, TodoState>(
+          builder: (context, state) {
+            if (state is TodoInitial) {
+              return const CircularProgressIndicator(
+                color: Colors.blue,
+              );
             }
+            if (state is TodoLoaded) {
+              final todoList = state.todos;
 
-            return ListView.builder(
-              itemBuilder: (context, index) {
-                // I personally like to retrieve the Todo object from list and
-                // assign it into a variable at the start of itemBuilder.
-                // This way you don't have to call todoList[index] many times.
-
-                final Todo todo = todoList[index];
-                return ListTile(
-                  title: Text(todo.name),
-                  subtitle: Text(
-                    todo.date.toString().substring(0, 16),
-                  ),
-                  onTap: () => _showDialogEditOrRemoveTodo(
-                    index,
-                    todo,
-                  ),
-                );
-              },
-              itemCount: todoList.length,
-            );
+              return ListView.builder(
+                itemBuilder: (context, index) {
+                  final Todo todo = todoList[index];
+                  return ListTile(
+                    title: Text(todo.name),
+                    subtitle: Text(
+                      todo.date.toString().substring(0, 16),
+                    ),
+                    onTap: () => _showDialogEditOrRemoveTodo(
+                      index,
+                      todo,
+                    ),
+                  );
+                },
+                itemCount: todoList.length,
+              );
+            } else {
+              return const Text('Something went wrong!');
+            }
           },
         ),
       )),
@@ -106,7 +98,7 @@ class _StreamBuilderPageState extends State<StreamBuilderPage> {
       date: DateTime.now(),
     );
 
-    await widget.taskCreator.addTodo(newTodo);
+    context.read<TodoBloc>().add(AddTodo(listTodos: newTodo));
   }
 
   Future<void> _showDialogEditOrRemoveTodo(
@@ -125,10 +117,13 @@ class _StreamBuilderPageState extends State<StreamBuilderPage> {
 
     switch (result.action) {
       case DialogAction.editTodo:
-        await widget.taskCreator.editTodo(index, result.todo);
+        context
+            .read<TodoBloc>()
+            .add(EditTodo(index: index, newTodos: result.todo));
         break;
       case DialogAction.deleteTodo:
-        await widget.taskCreator.deleteTodo(result.todo);
+        context.read<TodoBloc>().add(DeleteTodo(listTodos: result.todo));
+
         break;
     }
   }
