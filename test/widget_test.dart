@@ -7,24 +7,57 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'package:jo_todos/main.dart';
+import 'package:jo_todos/home/stream_builder.dart';
+import 'package:jo_todos/services/memory_task_creator.dart';
+import 'package:jo_todos/widgets/add_todo_dialog.dart';
+import 'package:jo_todos/widgets/edit_or_delete_todo_dialog.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  final MemoryTaskCreator taskCreator = MemoryTaskCreator();
+  Widget createTodoScreenWidget() {
+    return MaterialApp(
+      title: 'To-Do List',
+      home: StreamBuilderPage(taskCreator: taskCreator),
+    );
+  }
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+  final finderAddToDoIcon = find.byIcon(Icons.add_box);
+  final finderTodoTextField = find.byType(TextField);
+  const taskTitle1 = 'J0nathan';
+  group('Homepage Test - ', () {
+    testWidgets('Expect visual', (WidgetTester tester) async {
+      // Build our app and trigger a frame.
+      await tester.pumpWidget(createTodoScreenWidget());
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+      expect(finderAddToDoIcon, findsOneWidget);
+    });
+    group('Show dialog - ', () {
+      testWidgets('Add todo dialog', (WidgetTester tester) async {
+        // Build our app and trigger a frame.
+        await tester.pumpWidget(createTodoScreenWidget());
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+        await tester.tap(finderAddToDoIcon);
+        await tester.pumpAndSettle();
+
+        expect(find.byType(AddTodoDialog), findsOneWidget);
+      });
+
+      testWidgets('Edit or Remove todo dialog', (WidgetTester tester) async {
+        // Build our app and trigger a frame.
+        await tester.pumpWidget(createTodoScreenWidget());
+
+        await tester.tap(finderAddToDoIcon);
+        await tester.pumpAndSettle();
+
+        await tester.enterText(finderTodoTextField, taskTitle1);
+        await tester.tap(find.byType(TextButton));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text(taskTitle1));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(EditOrDeleteDialog), findsOneWidget);
+      });
+    });
   });
 }
