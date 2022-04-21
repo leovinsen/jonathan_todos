@@ -10,14 +10,13 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocProvider(
-        providers: [
-          BlocProvider(create: (context) => TodoBloc()..add(LoadTodoList()))
-        ],
-        child: const MaterialApp(
-          debugShowCheckedModeBanner: false,
-          title: 'To-Do List',
-          home: StreamBuilderPage(),
-        ));
+    return BlocProvider(
+      create: (context) => TodoBloc()..add(LoadTodoList()),
+      child: const MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'To-Do List',
+        home: StreamBuilderPage(),
+      ),
+    );
   }
 }

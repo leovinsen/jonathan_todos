@@ -98,11 +98,11 @@ class _StreamBuilderPageState extends State<StreamBuilderPage> {
       date: DateTime.now(),
     );
 
-    context.read<TodoBloc>().add(AddTodo(listTodos: newTodo));
+    context.read<TodoBloc>().add(AddTodo(listTodo: newTodo));
   }
 
   Future<void> _showDialogEditOrRemoveTodo(
-    int index,
+    int indextodo,
     Todo todo,
   ) async {
     final DialogResult? result = await showDialog<DialogResult>(
@@ -119,10 +119,10 @@ class _StreamBuilderPageState extends State<StreamBuilderPage> {
       case DialogAction.editTodo:
         context
             .read<TodoBloc>()
-            .add(EditTodo(index: index, newTodos: result.todo));
+            .add(EditTodo(index: indextodo, newTodo: result.todo));
         break;
       case DialogAction.deleteTodo:
-        context.read<TodoBloc>().add(DeleteTodo(listTodos: result.todo));
+        context.read<TodoBloc>().add(DeleteTodo(listTodo: result.todo));
 
         break;
     }

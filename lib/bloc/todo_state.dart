@@ -9,6 +9,8 @@ abstract class TodoState extends Equatable {
 
 class TodoInitial extends TodoState {}
 
+class TodoLoading extends TodoState {}
+
 class TodoLoaded extends TodoState {
   final List<Todo> todos;
 
@@ -18,4 +20,12 @@ class TodoLoaded extends TodoState {
 
   @override
   List<Object> get props => [todos];
+
+  TodoLoaded copyWith({
+    List<Todo>? todos,
+  }) {
+    return TodoLoaded(
+      todos: todos ?? this.todos,
+    );
+  }
 }

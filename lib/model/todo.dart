@@ -1,4 +1,6 @@
-class Todo {
+import 'package:equatable/equatable.dart';
+
+class Todo extends Equatable {
   Todo({
     required this.name,
     required this.date,
@@ -11,4 +13,7 @@ class Todo {
   String toString() {
     return "$name, $date";
   }
+
+  @override
+  List<Object?> get props => [name, date];
 }

@@ -1,26 +1,26 @@
-import 'dart:async';
+// import 'dart:async';
 
-import '../model/todo.dart';
+// import '../model/todo.dart';
 
-/// Responsible for adding, editing, and deleting todos
-///
-/// Listen to [streamCtrlTodo] to receive updates
-abstract class ITaskCreator {
-  final streamCtrlTodo = StreamController<List<Todo>>.broadcast();
+// /// Responsible for adding, editing, and deleting todos
+// ///
+// /// Listen to [streamCtrlTodo] to receive updates
+// abstract class ITaskCreator {
+//   final streamCtrlTodo = StreamController<List<Todo>>.broadcast();
 
-  /// Adds a Todo
-  Future<void> addTodo(Todo todo);
+//   /// Adds a Todo
+//   Future<void> addTodo(Todo todo);
 
-  /// Edits [oldTodo] into [newTodo]
-  // Future<void> editTodo(Todo oldTodo, Todo newTodo);
+//   /// Edits [oldTodo] into [newTodo]
+//   // Future<void> editTodo(Todo oldTodo, Todo newTodo);
 
-  Future<void> editTodo(int index, Todo newTodo);
+//   Future<void> editTodo(int index, Todo newTodo);
 
-  /// Deletes a Todo
-  Future<void> deleteTodo(Todo todo);
+//   /// Deletes a Todo
+//   Future<void> deleteTodo(Todo todo);
 
-  /// Release resources
-  void dispose() {
-    streamCtrlTodo.close();
-  }
-}
+//   /// Release resources
+//   void dispose() {
+//     streamCtrlTodo.close();
+//   }
+// }
